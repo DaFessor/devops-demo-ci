@@ -15,6 +15,7 @@ public class DevopsDemoApplication {
                 "<p>With Docker, we can containerize SEP4 back-end and front-end applications.</p></body>";
     }
 
+    /* Haha */
     public static void main(String[] args) {
         SpringApplication.run(DevopsDemoApplication.class, args);
     }

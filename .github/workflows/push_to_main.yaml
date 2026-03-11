@@ -11,6 +11,7 @@ on:
 
 jobs:
   run_tests_and_update_image_and_coverage_report:
+    name: Run tests, update image and coverage report
     runs-on: ubuntu-latest
     permissions:
       contents: read

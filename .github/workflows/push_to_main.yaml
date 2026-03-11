@@ -1,7 +1,7 @@
 # This workflow is triggered on push to the main branch and on pull requests
 # to the main branch. It runs all tests, builds a Docker image, and deploys
 # the test coverage report to GitHub Pages.
-name: Run tests and update image and coverage report
+name: Compile application and run tests
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ on:
       - main
 
 jobs:
-  run_tests_and_update_image_and_coverage_report:
-    name: Run tests, update image and coverage report
+  run_tests:
+    name: Compile application and run tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,51 +38,3 @@ jobs:
           name: test-coverage-report
           path: target/site/jacoco/
           retention-days: 7
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and publish updated image
-        run: |
-          mvn package
-          reponame_lowercase=${GITHUB_REPOSITORY,,}
-          image_name=$(echo ${reponame_lowercase} | cut -f2 -d/)-img
-          image_tag=ghcr.io/${reponame_lowercase}/${image_name}:latest
-          echo "Image tag is ${image_tag}"
-          docker build . --tag ${image_tag}
-          docker push ${image_tag}
-
-  update_gh_pages:
-    runs-on: ubuntu-latest
-    needs: run_tests_and_update_image_and_coverage_report
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-      pages: write
-    environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Download latest test coverage report
-        uses: actions/download-artifact@v4
-        with:
-          name: test-coverage-report
-          path: coverage
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './coverage/'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
